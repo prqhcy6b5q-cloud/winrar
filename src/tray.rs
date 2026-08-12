@@ -8,19 +8,6 @@ use std::sync::{Arc, Mutex};
 #[cfg(windows)]
 use std::time::Duration;
 
-pub fn start_tray() {
-    if crate::ui_interface::get_builtin_option(hbb_common::config::keys::OPTION_HIDE_TRAY) == "Y" {
-        #[cfg(not(target_os = "macos"))]
-        {
-            return;
-        }
-    }
-
-    #[cfg(target_os = "linux")]
-    crate::server::check_zombie();
-
-    allow_err!(make_tray());
-}
 
 fn make_tray() -> hbb_common::ResultType<()> {
     // https://github.com/tauri-apps/tray-icon/blob/dev/examples/tao.rs
