@@ -19,9 +19,12 @@ jobs:
         submodules: recursive
 
     - name: Inject server config
+      shell: powershell
       run: |
-        sed -i 's|rs-ny.rustdesk.com|103.40.14.14:33973|g' libs/hbb_common/src/config.rs
-        sed -i 's|OeVuKk5nlHiXp+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw=|QXjGQibEKuQDg4QGfJpd1BPwJl4XcVoQO1B+KG+rBK0=|g' libs/hbb_common/src/config.rs
+        $config = Get-Content "libs/hbb_common/src/config.rs"
+        $config = $config -replace 'rs-ny\.rustdesk\.com', '103.40.14.14:33973'
+        $config = $config -replace 'OeVuKk5nlHiXp\+APNn0Y3pC1Iwpwn44JGqrQCsWqmBw\=', 'QXjGQibEKuQDg4QGfJpd1BPwJl4XcVoQO1B+KG+rBK0='
+        Set-Content "libs/hbb_common/src/config.rs" $config -NoNewline
 
     - name: Install Rust toolchain
       uses: dtolnay/rust-toolchain@stable
