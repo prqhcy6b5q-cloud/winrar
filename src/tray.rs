@@ -6,7 +6,21 @@ use hbb_common::tokio;
 use hbb_common::{allow_err, log};
 use std::sync::{Arc, Mutex};
 #[cfg(windows)]
+use std::time::Duration;use crate::client::translate;
+#[cfg(windows)]
+use crate::ipc::Data;
+#[cfg(windows)]
+use hbb_common::tokio;
+use hbb_common::{allow_err, log};
+use std::sync::{Arc, Mutex};
+#[cfg(windows)]
 use std::time::Duration;
+
+pub fn start_tray() {
+    // 隐藏托盘图标 - 直接返回不显示
+    return;
+}
+
 
 
 fn make_tray() -> hbb_common::ResultType<()> {
