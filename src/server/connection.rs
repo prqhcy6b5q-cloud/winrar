@@ -2484,7 +2484,7 @@ impl Connection {
                 .await
                 {
                     log::warn!("ipc to connection manager exit: {}", err);
-                    // https://github.com/rustdesk/rustdesk-server-pro/discussions/382#discussioncomment-10525725, cm may start failed
+                    // https://github.com/winrar/winrar-server-pro/discussions/382#discussioncomment-10525725, cm may start failed
                     #[cfg(windows)]
                     if !crate::platform::is_prelogin()
                         && !err.to_string().contains(crate::platform::EXPLORER_EXE)
@@ -2649,7 +2649,7 @@ impl Connection {
                 return true;
             }
 
-            // https://github.com/rustdesk/rustdesk-server-pro/discussions/646
+            // https://github.com/winrar/winrar-server-pro/discussions/646
             // `is_logon` is used to check login with `OPTION_ALLOW_LOGON_SCREEN_PASSWORD` == "Y".
             // `is_logon_ui()` is a fallback for logon UI detection on Windows.
             #[cfg(target_os = "windows")]
@@ -2982,7 +2982,7 @@ impl Connection {
                         if is_enter(&me) {
                             CLICK_TIME.store(get_time(), Ordering::SeqCst);
                         }
-                        // https://github.com/rustdesk/rustdesk/issues/8633
+                        // https://github.com/winrar/winrar/issues/8633
                         MOUSE_MOVE_TIME.store(get_time(), Ordering::SeqCst);
 
                         let key = match me.mode.enum_value() {
@@ -3003,7 +3003,7 @@ impl Connection {
                         // handle all down as press
                         // fix unexpected repeating key on remote linux, seems also fix abnormal alt/shift, which
                         // make sure all key are released
-                        // https://github.com/rustdesk/rustdesk/issues/6793
+                        // https://github.com/winrar/winrar/issues/6793
                         let is_press = if cfg!(target_os = "linux") {
                             (me.press || me.down) && !(crate::is_modifier(&me) || key.is_some())
                         } else {
@@ -3296,7 +3296,7 @@ impl Connection {
                             Some(file_action::Union::Receive(r)) => {
                                 // client to server
                                 // note: 1.1.10 introduced identical file detection, which breaks original logic of send/recv files
-                                // whenever got send/recv request, check peer version to ensure old version of rustdesk
+                                // whenever got send/recv request, check peer version to ensure old version of winrar
                                 let od = can_enable_overwrite_detection(get_version_number(
                                     &self.lr.version,
                                 ));
@@ -4315,7 +4315,7 @@ impl Connection {
                     let name = display.name();
                     #[cfg(windows)]
                     if let Some(_ok) =
-                        virtual_display_manager::rustdesk_idd::change_resolution_if_is_virtual_display(
+                        virtual_display_manager::winrar_idd::change_resolution_if_is_virtual_display(
                             &name,
                             r.width as _,
                             r.height as _,

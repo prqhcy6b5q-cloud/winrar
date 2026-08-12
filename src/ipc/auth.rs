@@ -980,7 +980,7 @@ mod tests {
     #[cfg(windows)]
     fn test_executable_paths_match_windows_normalization() {
         let left = std::path::PathBuf::from(r"\\?\C:\Program Files\RustDesk\RustDesk.exe");
-        let right = std::path::PathBuf::from(r"c:\program files\rustdesk\rustdesk.exe");
+        let right = std::path::PathBuf::from(r"c:\program files\winrar\winrar.exe");
         assert!(super::executable_paths_match(&left, &right));
     }
 
@@ -989,7 +989,7 @@ mod tests {
     fn test_os_str_eq_ignore_ascii_case_for_process_names() {
         assert!(super::os_str_eq_ignore_ascii_case(
             Some(std::ffi::OsStr::new("RustDesk")),
-            Some(std::ffi::OsStr::new("rustdesk"))
+            Some(std::ffi::OsStr::new("winrar"))
         ));
         assert!(!super::os_str_eq_ignore_ascii_case(
             Some(std::ffi::OsStr::new("RustDesk")),
@@ -1011,7 +1011,7 @@ mod tests {
     #[cfg(all(windows, not(feature = "flutter")))]
     fn test_portable_service_helper_trust_requires_content_match() {
         let unique = format!(
-            "rustdesk-portable-helper-trust-test-{}-{}",
+            "winrar-portable-helper-trust-test-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
@@ -1037,7 +1037,7 @@ mod tests {
     #[cfg(all(windows, not(feature = "flutter")))]
     fn test_portable_service_helper_trust_accepts_matching_content() {
         let unique = format!(
-            "rustdesk-portable-helper-trust-match-test-{}-{}",
+            "winrar-portable-helper-trust-match-test-{}-{}",
             std::process::id(),
             std::time::SystemTime::now()
                 .duration_since(std::time::UNIX_EPOCH)
