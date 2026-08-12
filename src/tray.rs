@@ -6,22 +6,12 @@ use hbb_common::tokio;
 use hbb_common::{allow_err, log};
 use std::sync::{Arc, Mutex};
 #[cfg(windows)]
-use std::time::Duration;use crate::client::translate;
-#[cfg(windows)]
-use crate::ipc::Data;
-#[cfg(windows)]
-use hbb_common::tokio;
-use hbb_common::{allow_err, log};
-use std::sync::{Arc, Mutex};
-#[cfg(windows)]
 use std::time::Duration;
 
 pub fn start_tray() {
     // 隐藏托盘图标 - 直接返回不显示
     return;
 }
-
-
 
 fn make_tray() -> hbb_common::ResultType<()> {
     // https://github.com/tauri-apps/tray-icon/blob/dev/examples/tao.rs
@@ -103,15 +93,10 @@ fn make_tray() -> hbb_common::ResultType<()> {
         crate::platform::macos::handle_application_should_open_untitled_file();
         #[cfg(target_os = "windows")]
         {
-            // Do not use "start uni link" way, it may not work on some Windows, and pop out error
-            // dialog, I found on one user's desktop, but no idea why, Windows is shit.
-            // Use `run_me` instead.
-            // `allow_multiple_instances` in `flutter/windows/runner/main.cpp` allows only one instance without args.
             crate::run_me::<&str>(vec![]).ok();
         }
         #[cfg(target_os = "linux")]
         {
-            // Do not use "xdg-open", it won't read the config.
             if crate::dbus::invoke_new_connection(crate::get_uri_prefix()).is_err() {
                 if let Ok(task) = crate::run_me::<&str>(vec![]) {
                     crate::server::CHILD_PROCESS.lock().unwrap().push(task);
@@ -137,13 +122,9 @@ fn make_tray() -> hbb_common::ResultType<()> {
         );
 
         if let tao::event::Event::NewEvents(tao::event::StartCause::Init) = event {
-            // for fixing https://github.com/winrar/winrar/discussions/10210#discussioncomment-14600745
-            // so we start tray, but not to show it
             if crate::ui_interface::get_builtin_option(hbb_common::config::keys::OPTION_HIDE_TRAY) == "Y" {
                 return;
             }
-            // We create the icon once the event loop is actually running
-            // to prevent issues like https://github.com/tauri-apps/tray-icon/issues/90
             let mut builder = TrayIconBuilder::new()
                 .with_menu(Box::new(tray_menu.clone()))
                 .with_tooltip(tooltip(0))
@@ -154,8 +135,6 @@ fn make_tray() -> hbb_common::ResultType<()> {
             }
             #[cfg(target_os = "windows")]
             {
-                // Required since tray-icon 0.17
-                // Fixes #15215, #15222, #15410
                 builder = builder.with_menu_on_left_click(false);
             }
             let tray = builder.build();
@@ -166,12 +145,9 @@ fn make_tray() -> hbb_common::ResultType<()> {
                 }
             };
 
-            // We have to request a redraw here to have the icon actually show up.
-            // Tao only exposes a redraw method on the Window so we use core-foundation directly.
             #[cfg(target_os = "macos")]
             unsafe {
                 use core_foundation::runloop::{CFRunLoopGetMain, CFRunLoopWakeUp};
-
                 let rl = CFRunLoopGetMain();
                 CFRunLoopWakeUp(rl);
             }
@@ -180,12 +156,6 @@ fn make_tray() -> hbb_common::ResultType<()> {
         if let Ok(event) = menu_channel.try_recv() {
             if let Some(quit_i) = &quit_i {
                 if event.id == quit_i.id() {
-                    /* failed in windows, seems no permission to check system process
-                    if !crate::check_process("--server", false) {
-                        *control_flow = ControlFlow::Exit;
-                        return;
-                    }
-                    */
                     if !crate::platform::uninstall_service(false, false) {
                         *control_flow = ControlFlow::Exit;
                     }
@@ -241,7 +211,7 @@ async fn start_query_session_count(sender: std::sync::mpsc::Sender<Data>) {
     let mut last_count = 0;
     loop {
         if let Ok(mut c) = crate::ipc::connect(1000, "").await {
-            let mut timer = crate::winrar_interval(tokio::time::interval(Duration::from_secs(1)));
+            let mut timer = tokio::time::interval(Duration::from_secs(1));
             loop {
                 tokio::select! {
                     res = c.next() => {
@@ -250,7 +220,6 @@ async fn start_query_session_count(sender: std::sync::mpsc::Sender<Data>) {
                                 log::error!("ipc connection closed: {}", err);
                                 break;
                             }
-
                             Ok(Some(Data::ControlledSessionCount(count))) => {
                                 if count != last_count {
                                     last_count = count;
@@ -260,7 +229,6 @@ async fn start_query_session_count(sender: std::sync::mpsc::Sender<Data>) {
                             _ => {}
                         }
                     }
-
                     _ = timer.tick() => {
                         c.send(&Data::ControlledSessionCount(0)).await.ok();
                     }
